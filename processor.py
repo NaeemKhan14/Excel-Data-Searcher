@@ -3,12 +3,14 @@ import os
 
 
 class Processor(object):
+    # GLobal variables
     workbook = None
     sheet = None
     input_list = None
+    regex_list = None
     result_file = ""
 
-    def __init__(_, name, input, sheet_number=None):
+    def __init__(_, name, input, regex, sheet_number=None):
         # Load the input file
         Processor.workbook = load_workbook(name)
         # Save the name of the file to later use for the new file
@@ -16,8 +18,10 @@ class Processor(object):
         # Select the sheet number to work with. If nothing is given, default
         # first sheet is selected
         Processor.sheet = Processor.workbook[sheet_number] if sheet_number else Processor.workbook.active
-        # Split the input into an array, and trim white spaces
+        # Split the input (words to search for) into an array, and trim white spaces
         Processor.input_list = [x.strip() for x in input.split(',')]
+        # Split the regex input into an array, and trim white spaces
+        Processor.regex_list = [x.strip() for x in regex.split(',')]
 
     def process_rows(_, search_col, result_col):
         results_file_name = Processor.result_file[0] + "_RESULTS." + Processor.result_file[1]
@@ -29,12 +33,21 @@ class Processor(object):
         sheet = new_file.active
         sheet.append(["-----------------------------------------------------------", ""])
 
+        # Go through each row, and first check for the input (full matching word),
+        # if it is found, put it in the new file. Otherwise check if the regex flag
+        # is set. If it is, then check if this row (in the specified column) contains
+        # that word, and add it in the list.
         for row in Processor.sheet:
             if row[search_col-1].value in Processor.input_list:
                 sheet.append([row[result_col-1].value, ""])
-
+            else:
+                for word in Processor.regex_list:
+                    if row[search_col-1].value.find(word) != -1: # if word is found
+                        sheet.append([row[result_col - 1].value, ""])
+        # Save the file
         new_file.save(filename=results_file_name)
 
+    # Creates a new Excel file if it doesn't exist
     def create_new_file(filename):
         new_file = Workbook()
         new_sheet = new_file.active

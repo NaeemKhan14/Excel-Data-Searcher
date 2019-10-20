@@ -7,7 +7,7 @@ from processor import Processor
 class GUI(Tk):
 
     def __init__(self):
-        global user_input, filename_str, filename, search_col, result_col, finish_label
+        global user_input, regex_input, filename_str, filename, search_col, result_col, finish_label
 
         super(GUI, self).__init__()
         self.title("Excel Searcher")
@@ -20,15 +20,21 @@ class GUI(Tk):
         user_input.grid(row=0, column=1)
         user_input.focus_set()
 
+        # Regex parameter label and Entry settings
+        tk.Label(self, text="Regex parameters to search for").grid(row=1)
+
+        regex_input = tk.Entry(self, width=100)
+        regex_input.grid(row=1, column=1)
+
         # File selection label
-        tk.Label(self, text="Input file").grid(row=1)
+        tk.Label(self, text="Input file").grid(row=2)
         # File Entry's text which will change with the file name selected from browse button
         filename_str = tk.StringVar()
         filename = tk.Entry(self, textvariable=filename_str, width=100)
-        filename.grid(row=1, column=1)
+        filename.grid(row=2, column=1)
 
         # Browse button to look for the file on the computer
-        tk.Button(self, text="Browse", command=self.load_file).grid(row=1, column=2)
+        tk.Button(self, text="Browse", command=self.load_file).grid(row=2, column=2)
 
         # Label for searching column and search column settings
         tk.Label(self, text="Column to search in").grid(row=3)
@@ -53,6 +59,6 @@ class GUI(Tk):
 
     # Get values of all the Entry boxes on this button press
     def start_button(self):
-        processor = Processor(str(filename.get()), str(user_input.get()))
+        processor = Processor(str(filename.get()), str(user_input.get()), str(regex_input.get()))
         processor.process_rows(search_col=int(search_col.get()), result_col=int(result_col.get()))
         finish_label.config(text="Finished Processing")
