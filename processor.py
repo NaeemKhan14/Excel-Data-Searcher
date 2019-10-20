@@ -19,9 +19,9 @@ class Processor(object):
         # first sheet is selected
         Processor.sheet = Processor.workbook[sheet_number] if sheet_number else Processor.workbook.active
         # Split the input (words to search for) into an array, and trim white spaces
-        Processor.input_list = [x.strip() for x in input.split(',')]
+        Processor.input_list = [x.strip() for x in input.lower().split(',')]
         # Split the regex input into an array, and trim white spaces
-        Processor.regex_list = [x.strip() for x in regex.split(',')]
+        Processor.regex_list = [x.strip() for x in regex.lower().split(',')]
 
     def process_rows(_, search_col, result_col):
         results_file_name = Processor.result_file[0] + "_RESULTS." + Processor.result_file[1]
@@ -42,7 +42,7 @@ class Processor(object):
                 sheet.append([row[result_col-1].value, ""])
             else:
                 for word in Processor.regex_list:
-                    if row[search_col-1].value.find(word) != -1: # if word is found
+                    if row[search_col-1].value.lower().find(word.lower()) != -1: # if word is found
                         sheet.append([row[result_col - 1].value, ""])
         # Save the file
         new_file.save(filename=results_file_name)
