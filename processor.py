@@ -38,12 +38,13 @@ class Processor(object):
         # is set. If it is, then check if this row (in the specified column) contains
         # that word, and add it in the list.
         for row in Processor.sheet:
-            if row[search_col-1].value in Processor.input_list:
+            if Processor.input_list[0] != '' and row[search_col-1].value.lower() in Processor.input_list:
                 sheet.append([row[result_col-1].value, ""])
             else:
-                for word in Processor.regex_list:
-                    if row[search_col-1].value.lower().find(word.lower()) != -1: # if word is found
-                        sheet.append([row[result_col - 1].value, ""])
+                if Processor.regex_list[0] != '':
+                    for word in Processor.regex_list:
+                        if row[search_col-1].value.lower().find(word) != -1:  # if word is found
+                            sheet.append([row[result_col - 1].value, ""])
         # Save the file
         new_file.save(filename=results_file_name)
 
