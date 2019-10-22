@@ -1,6 +1,8 @@
 from tkinter import *
+from tkinter.messagebox import showinfo, showwarning
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, scrolledtext
+import os.path
 from processor import Processor
 
 
@@ -13,17 +15,21 @@ class GUI(Tk):
         self.title("Excel Searcher")
         self.minsize(640, 100)
 
-        # Input parameter label and Entry settings
+        # Input parameter label and Textbox settings
         tk.Label(self, text="Input parameters to search for").grid(row=0)
 
-        user_input = tk.Entry(self, width=100)
+        user_input = scrolledtext.ScrolledText(self, height=5, width=73, wrap=WORD)
+        user_input.bind("<Return>", self.focus_next_window)
+        user_input.bind("<Tab>", self.focus_next_window)
         user_input.grid(row=0, column=1)
         user_input.focus_set()
 
-        # Regex parameter label and Entry settings
+        # Regex parameter label and Textbox settings
         tk.Label(self, text="Regex parameters to search for").grid(row=1)
 
-        regex_input = tk.Entry(self, width=100)
+        regex_input = scrolledtext.ScrolledText(self, height=5, width=73, wrap=WORD)
+        regex_input.bind("<Return>", self.focus_next_window)
+        regex_input.bind("<Tab>", self.focus_next_window)
         regex_input.grid(row=1, column=1)
 
         # File selection label
@@ -57,8 +63,38 @@ class GUI(Tk):
     def load_file(self):
         filename_str.set(filedialog.askopenfilename(master=self))
 
+    # Makes the textbox go to next widget when pressing tab or enter key
+    def focus_next_window(self, event):
+        event.widget.tk_focusNext().focus()
+        return "break"
+
+    # Returns True if the given textbox is empty
+    def textbox_isEmpty(self, textbox):
+        if len(textbox.get('0.0', 'end')) <= 1:
+            return True
+
+        return False
+
+    # Returns True if the given Entry is empty
+    def entry_isEmpty(self, entrybox):
+        if len(entrybox.get()) == 0:
+            return True
+
+        return False
+
     # Get values of all the Entry boxes on this button press
     def start_button(self):
-        processor = Processor(str(filename.get()), str(user_input.get()), str(regex_input.get()))
-        processor.process_rows(search_col=int(search_col.get()), result_col=int(result_col.get()))
-        finish_label.config(text="Finished Processing")
+        if self.textbox_isEmpty(user_input) and self.textbox_isEmpty(regex_input):
+            showinfo("No input given", "Please write something in one of the input boxes")
+        elif self.entry_isEmpty(filename):
+            showinfo("No file given", "Please select a file to continue")
+        elif self.entry_isEmpty(search_col):
+            showinfo("Search column empty", "Please write a value in search box")
+        elif self.entry_isEmpty(result_col):
+            showinfo("Result column empty", "Please write a value in result box")
+        elif not self.entry_isEmpty(filename) and not os.path.isfile(str(filename.get())):
+            showwarning("File does not exist", "Please select a valid file")
+        else:
+            processor = Processor(str(filename.get()), user_input.get('1.0', 'end-1c'), regex_input.get('1.0', 'end-1c'))
+            processor.process_rows(search_col=int(search_col.get()), result_col=int(result_col.get()))
+            finish_label.config(text="Finished Processing")
